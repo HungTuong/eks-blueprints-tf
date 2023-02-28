@@ -18,6 +18,7 @@ locals {
   }
 
   tags = {
+    Terraform   = "True"
     Environment = "dev"
   }
 }

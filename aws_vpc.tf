@@ -1,6 +1,6 @@
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "3.16.0"
+  version = "3.19.0"
 
   name = local.name
   cidr = local.vpc_cidr
@@ -35,3 +35,18 @@ module "vpc" {
 
   tags = local.tags
 }
+
+# module "endpoints" {
+#   source = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
+
+#   vpc_id = module.vpc.vpc_id
+
+#   endpoints = {
+#     secrets = {
+#       service    = "secrets"
+#       subnet_ids = module.vpc.private_subnet_ids
+#     }
+#   }
+
+#   tags = local.tags
+# }
