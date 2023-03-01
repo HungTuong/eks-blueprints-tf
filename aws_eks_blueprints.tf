@@ -34,7 +34,7 @@ module "eks_blueprints" {
       public_ip              = false                # Use this to enable public IP for EC2 instances; only for public subnets used in launch templates ;
       # 2> Node Group scaling configuration
       desired_size = 1
-      max_size     = 5
+      max_size     = 2
       min_size     = 1
 
       # 3> Node Group compute configuration
@@ -60,7 +60,7 @@ module "eks_blueprints" {
         WorkerType  = "SPOT"
       }
       additional_tags = {
-        Name        = "btl-x86-on-demand"
+        Name        = "btl-x86-spot"
         subnet_type = "private"
       }
     }
