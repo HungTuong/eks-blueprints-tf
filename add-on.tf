@@ -1,5 +1,5 @@
 module "kubernetes_addons" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.12.2/modules/kubernetes-addons"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.25.0/modules/kubernetes-addons"
 
   eks_cluster_id = module.eks_blueprints.eks_cluster_id
 
@@ -7,7 +7,7 @@ module "kubernetes_addons" {
   # ARGO CD ADD-ON
   #---------------------------------------------------------------
 
-  enable_argocd         = true
+  enable_argocd         = false
   argocd_manage_add_ons = true # Indicates that ArgoCD is responsible for managing/deploying Add-ons.
 
   argocd_applications = {
@@ -31,9 +31,9 @@ module "kubernetes_addons" {
 
 
   enable_aws_load_balancer_controller = true
-  enable_karpenter                    = true
+  enable_karpenter                    = false
   enable_secrets_store_csi_driver     = true
-  enable_metrics_server               = true
+  enable_metrics_server               = false
 
 }
 
