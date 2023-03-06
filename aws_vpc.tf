@@ -10,10 +10,10 @@ module "vpc" {
   private_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 4)]
   database_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 8)]
 
-  enable_nat_gateway   = true
+  enable_nat_gateway   = false
   create_igw           = true
   enable_dns_hostnames = true
-  single_nat_gateway   = true
+  # single_nat_gateway   = true
 
   # Manage so we can name
   manage_default_network_acl    = true
