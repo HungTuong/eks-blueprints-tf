@@ -22,3 +22,4 @@ output "application_teams_configure_kubectl" {
   description = "Configure kubectl for each Application Teams: make sure you're logged in with the correct AWS CLI profile and run the following command to update your kubeconfig"
   value       = try(module.eks_blueprints.teams[0].application_teams_configure_kubectl["team-alpha"], null)
 }
+
