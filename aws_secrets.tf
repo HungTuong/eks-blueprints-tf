@@ -1,22 +1,40 @@
 #---------------------------------------------------------------
 # External Secrets Operator - Secret
 #---------------------------------------------------------------
-
-resource "aws_kms_key" "secrets" {
-  enable_key_rotation = true
-}
-
-resource "aws_secretsmanager_secret" "secret" {
-  name                    = "FE_ENV"
+resource "aws_secretsmanager_secret" "fe_secrets" {
+  name                    = "TALY_FE_ENV"
+  description             = "Environment secrets for application front end"
   recovery_window_in_days = 0
-  kms_key_id              = aws_kms_key.secrets.arn
+}
+resource "aws_secretsmanager_secret" "be_secrets" {
+  name                    = "TALY_BE_ENV"
+  description             = "Environment secrets for application back end"
+  recovery_window_in_days = 0
 }
 
-resource "aws_secretsmanager_secret_version" "secret" {
-  secret_id = aws_secretsmanager_secret.secret.id
+resource "aws_secretsmanager_secret_version" "fe" {
+  secret_id = aws_secretsmanager_secret.fe_secrets.id
   secret_string = jsonencode({
-    NEXT_PUBLIC_API_URL           = var.fe_secrets.NEXT_PUBLIC_API_URL,
-    NEXT_PUBLIC_BASE_API_ENDPOINT = var.fe_secrets.NEXT_PUBLIC_BASE_API_ENDPOINT
+    NEXT_PUBLIC_API_URL               = var.fe_secrets.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID = var.fe_secrets.NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID
+  })
+}
+
+resource "aws_secretsmanager_secret_version" "be" {
+  secret_id = aws_secretsmanager_secret.be_secrets.id
+  secret_string = jsonencode({
+    PORT                  = var.be_secrets.PORT,
+    MONGO_URL             = var.be_secrets.MONGO_URL,
+    GOOGLE_AUTH_CLIENT_ID = var.be_secrets.GOOGLE_AUTH_CLIENT_ID,
+    ADMIN_EMAIL           = var.be_secrets.ADMIN_EMAIL,
+    JWT_SECRET            = var.be_secrets.JWT_SECRET,
+    FE_URL                = var.be_secrets.FE_URL,
+    BE_URL                = var.be_secrets.BE_URL,
+    ADMIN_SESSION_SECRET  = var.be_secrets.ADMIN_SESSION_SECRET,
+    SENDGRID_API_KEY      = var.be_secrets.SENDGRID_API_KEY,
+    SENDGRID_FROM         = var.be_secrets.SENDGRID_FROM,
+    AWS_REGION            = var.be_secrets.AWS_REGION,
+    AWS_BUCKET_NAME       = var.be_secrets.AWS_BUCKET_NAME
   })
 }
 
@@ -38,29 +56,32 @@ module "cluster_secretstore_role" {
 resource "aws_iam_policy" "cluster_secretstore" {
   name_prefix = local.cluster_secretstore_sa
   policy      = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
     {
-        "Version": "2012-10-17",
-        "Statement": [
-            {
-            "Effect": "Allow",
-            "Action": [
-                "secretsmanager:GetResourcePolicy",
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-                "secretsmanager:ListSecretVersionIds"
-            ],
-            "Resource": "${aws_secretsmanager_secret.secret.arn}"
-            },
-            {
-            "Effect": "Allow",
-            "Action": [
-                "kms:Decrypt"
-            ],
-            "Resource": "${aws_kms_key.secrets.arn}"
-            }
-        ]
+    "Effect": "Allow",
+    "Action": [
+      "secretsmanager:GetResourcePolicy",
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret",
+      "secretsmanager:ListSecretVersionIds"
+    ],
+    "Resource": [
+      "${aws_secretsmanager_secret.fe_secrets.arn}",
+      "${aws_secretsmanager_secret.be_secrets.arn}"
+    ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt"
+      ],
+      "Resource": "arn:aws:kms:${local.region}:${data.aws_caller_identity.current.account_id}:key/*"
     }
-    POLICY
+  ]
+}
+POLICY
 }
 
 resource "kubectl_manifest" "cluster_secretstore" {
@@ -73,22 +94,76 @@ spec:
   provider: aws
   parameters:
     objects: |
-      - objectName: ${aws_secretsmanager_secret.secret.name}
+      - objectName: ${aws_secretsmanager_secret.fe_secrets.name}
         objectType: "secretsmanager"
         jmesPath:
-          - path: NEXT_PUBLIC_BASE_API_ENDPOINT
-            objectAlias: api_endpoint
           - path: NEXT_PUBLIC_API_URL
-            objectAlias: api_url
+            objectAlias: api_endpoint
+          - path: NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID
+            objectAlias: google_auth
+      - objectName: ${aws_secretsmanager_secret.be_secrets.name}
+        objectType: "secretsmanager"
+        jmesPath:
+          - path: PORT
+            objectAlias: port
+          - path: MONGO_URL
+            objectAlias: mongo_endpoint
+          - path: GOOGLE_AUTH_CLIENT_ID
+            objectAlias: google_client
+          - path: ADMIN_EMAIL
+            objectAlias: admin_email
+          - path: JWT_SECRET
+            objectAlias: jwt
+          - path: FE_URL
+            objectAlias: fe_url
+          - path: BE_URL
+            objectAlias: be_url
+          - path: ADMIN_SESSION_SECRET
+            objectAlias: session_secret
+          - path: SENDGRID_API_KEY
+            objectAlias: sendgrid_api
+          - path: SENDGRID_FROM
+            objectAlias: sendgrid_from
+          - path: AWS_REGION
+            objectAlias: region
+          - path: AWS_BUCKET_NAME
+            objectAlias: bucket_name
 
   secretObjects:
     - secretName: frontendsecret
       type: Opaque
       data:
         - objectName: api_endpoint
-          key: endpoint
-        - objectName: api_url
-          key: api    
+          key: api_endpoint
+        - objectName: google_auth
+          key: google_auth
+    - secretName: backendsecret
+      type: Opaque
+      data:
+        - objectName: port
+          key: port
+        - objectName: mongo_endpoint
+          key: mongo_endpoint
+        - objectName: google_client
+          key: google_client
+        - objectName: admin_email
+          key: admin_email
+        - objectName: jwt
+          key: jwt
+        - objectName: fe_url
+          key: fe_url
+        - objectName: be_url
+          key: be_url
+        - objectName: session_secret
+          key: session_secret
+        - objectName: sendgrid_api
+          key: sendgrid_api
+        - objectName: sendgrid_from
+          key: sendgrid_from
+        - objectName: region
+          key: region
+        - objectName: bucket_name
+          key: bucket_name
 YAML
 
   depends_on = [module.eks_blueprints_kubernetes_addons]

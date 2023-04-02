@@ -58,7 +58,7 @@ module "eks_blueprints" {
 
       # 5> Node Group network configuration
       subnet_type = "private"
-      subnet_ids  = [] # Defaults to private subnet-ids used by EKS Controle plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
+      subnet_ids  = module.vpc.private_subnets # Defaults to private subnet-ids used by EKS Controle plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
 
       node_security_group_additional_rules = {
         ingress_allow_access_from_control_plane = {
@@ -67,7 +67,7 @@ module "eks_blueprints" {
           from_port                     = 9443
           to_port                       = 9443
           source_cluster_security_group = true
-          description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
+          description                   = "Allow access from control plane to webhook port of AWS load balancer controller."
         }
       }
 

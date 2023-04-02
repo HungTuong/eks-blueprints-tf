@@ -1,7 +1,11 @@
 module "eks_blueprints_kubernetes_addons" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.27.0/modules/kubernetes-addons"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints-addons"
 
-  eks_cluster_id = module.eks_blueprints.eks_cluster_id
+  cluster_name      = module.eks_blueprints.eks_cluster_id
+  oidc_provider_arn = module.eks_blueprints.eks_oidc_provider_arn
+  oidc_provider     = module.eks_blueprints.oidc_provider
+  cluster_endpoint  = module.eks_blueprints.eks_cluster_endpoint
+  cluster_version   = local.cluster_version
 
   #   #---------------------------------------------------------------
   #   # ARGO CD ADD-ON
@@ -31,9 +35,23 @@ module "eks_blueprints_kubernetes_addons" {
 
 
   enable_aws_load_balancer_controller = true
-  enable_karpenter                    = false
-  enable_secrets_store_csi_driver     = true
-  enable_metrics_server               = false
+  aws_load_balancer_controller_helm_config = {
+    service_account = "aws-lb-sa"
+  }
+
+
+  # enable_karpenter                = false
+  # enable_secrets_store_csi_driver = true
+  # secrets_store_csi_driver_helm_config = {
+  #   namespace            = "kube-system",
+  #   "syncSecret.enabled" = "true"
+  # }
+  # enable_secrets_store_csi_driver_provider_aws = true
+  # csi_secrets_store_provider_aws_helm_config = {
+  #   name = "kube-system"
+  # }
+
+  enable_metrics_server = false
 
 }
 

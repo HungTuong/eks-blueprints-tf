@@ -15,7 +15,6 @@ locals {
   # External secrets
   cluster_secretstore_name = "secrets-store-csi"
   cluster_secretstore_sa   = "secrets-store-csi-sa"
-  secretstore_name         = "secretstore-ps"
   secretstore_sa           = "secretstore-sa"
   addon_application = {
     path               = "chart"
