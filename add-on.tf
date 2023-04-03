@@ -35,21 +35,28 @@ module "eks_blueprints_kubernetes_addons" {
 
 
   enable_aws_load_balancer_controller = true
+  enable_external_dns                 = true
   aws_load_balancer_controller_helm_config = {
     service_account = "aws-lb-sa"
   }
 
 
-  # enable_karpenter                = false
-  # enable_secrets_store_csi_driver = true
-  # secrets_store_csi_driver_helm_config = {
-  #   namespace            = "kube-system",
-  #   "syncSecret.enabled" = "true"
-  # }
-  # enable_secrets_store_csi_driver_provider_aws = true
-  # csi_secrets_store_provider_aws_helm_config = {
-  #   name = "kube-system"
-  # }
+  enable_karpenter                = true
+  enable_secrets_store_csi_driver = true
+  secrets_store_csi_driver_helm_config = {
+    namespace = "kube-system"
+  }
+  enable_secrets_store_csi_driver_provider_aws = true
+  csi_secrets_store_provider_aws_helm_config = {
+    name    = "kube-system"
+    version = "0.0.4"
+    values = [
+      <<-EOT
+        secrets-store-csi-driver:
+          syncSecret.enabled: true
+      EOT
+    ]
+  }
 
   enable_metrics_server = false
 
