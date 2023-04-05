@@ -2,7 +2,7 @@
 module "eks_blueprints" {
   source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.27.0"
 
-  cluster_name = "${local.project}-cluster"
+  cluster_name = local.project
 
   # EKS Cluster VPC and Subnet mandatory config
   vpc_id             = module.vpc.vpc_id
@@ -22,6 +22,44 @@ module "eks_blueprints" {
   ]
 
   # EKS MANAGED NODE GROUPS
+  node_security_group_additional_rules = {
+    ingress_self_front_end = {
+      description = "Allow FE access within node groups"
+      protocol    = "tcp"
+      from_port   = 8000
+      to_port     = 8000
+      type        = "ingress"
+      self        = true
+    }
+
+    ingress_self_back_end = {
+      description = "Allow BE access within node groups"
+      protocol    = "tcp"
+      from_port   = 5000
+      to_port     = 5000
+      type        = "ingress"
+      self        = true
+    }
+
+    egress_to_mongodb = {
+      description = "Node to mongoDB"
+      protocol    = "tcp"
+      from_port   = 27017
+      to_port     = 27017
+      type        = "egress"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress_allow_access_from_control_plane = {
+      type                          = "ingress"
+      protocol                      = "tcp"
+      from_port                     = 9443
+      to_port                       = 9443
+      source_cluster_security_group = true
+      description                   = "Allow access from control plane to webhook port of AWS load balancer controller."
+    }
+  }
+
   managed_node_groups = {
     #---------------------------------------------------------#
     # Bottlerocket instance type Worker Group
@@ -59,43 +97,6 @@ module "eks_blueprints" {
       # 5> Node Group network configuration
       subnet_type = "private"
       subnet_ids  = module.vpc.private_subnets # Defaults to private subnet-ids used by EKS Controle plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
-
-      node_security_group_additional_rules = {
-        ingress_self_front_end = {
-          description = "Allow FE access within node groups"
-          protocol    = "tcp"
-          from_port   = 8000
-          to_port     = 8000
-          type        = "ingress"
-          self        = true
-        }
-
-        ingress_self_back_end = {
-          description = "Allow BE access within node groups"
-          protocol    = "tcp"
-          from_port   = 5000
-          to_port     = 5000
-          type        = "ingress"
-          self        = true
-        }
-
-        egress_to_mongodb = {
-          description = "Node to mongoDB"
-          protocol    = "tcp"
-          from_port   = 27017
-          to_port     = 27017
-          type        = "egress"
-        }
-
-        ingress_allow_access_from_control_plane = {
-          type                          = "ingress"
-          protocol                      = "tcp"
-          from_port                     = 9443
-          to_port                       = 9443
-          source_cluster_security_group = true
-          description                   = "Allow access from control plane to webhook port of AWS load balancer controller."
-        }
-      }
 
       k8s_labels = {
         Environment = "dev"

@@ -24,10 +24,6 @@ module "vpc" {
     Name = "${local.project}-igw"
   }
 
-  manage_default_network_acl    = true
-  manage_default_route_table    = true
-  manage_default_security_group = true
-
   default_vpc_enable_dns_support   = true
   default_vpc_enable_dns_hostnames = true
   enable_dns_support               = true

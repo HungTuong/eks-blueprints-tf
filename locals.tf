@@ -2,7 +2,7 @@ locals {
   project         = "thesis"
   iam_name        = "hungt.iam"
   region          = data.aws_region.current.name
-  cluster_version = "1.24"
+  cluster_version = "1.25"
   namespace       = "default"
 
   vpc_cidr = "10.0.0.0/16"
