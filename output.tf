@@ -10,7 +10,7 @@ output "vpc_id" {
 
 output "public_subnets" {
   description = "The ID of the public subnets"
-  value       = module.vpc.public_subnets
+  value       = replace(join(", ", module.vpc.public_subnets), "\"", "")
 }
 
 output "configure_kubectl" {

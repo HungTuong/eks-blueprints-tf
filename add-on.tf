@@ -40,37 +40,37 @@ module "eks_blueprints_kubernetes_addons" {
 
 
   enable_aws_load_balancer_controller = true
-  enable_external_dns                 = false
-  aws_load_balancer_controller_helm_config = {
-    service_account = "aws-lb-sa"
-  }
+  enable_karpenter                    = false
 
-
-  enable_karpenter                = false
-  enable_secrets_store_csi_driver = false
-  secrets_store_csi_driver_helm_config = {
-    name       = "csi-secrets-store"
-    chart      = "secrets-store-csi-driver"
-    repository = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
-    version    = "1.3.1"
-    namespace  = "kube-system"
-    set_values = [
-      {
-        name  = "syncSecret.enabled"
-        value = "true"
-      },
-      {
-        name  = "enableSecretRotation"
-        value = "true"
-      }
-    ]
-  }
-
-  enable_secrets_store_csi_driver_provider_aws = false
-  # csi_secrets_store_provider_aws_helm_config = {
-  #   namespace = "kube-system"
-  #   version   = "0.0.4"
+  # aws_load_balancer_controller_helm_config = {
+  #   service_account = "aws-lb-sa"
   # }
+
+
+  # enable_secrets_store_csi_driver = false
+  # secrets_store_csi_driver_helm_config = {
+  #   name       = "csi-secrets-store"
+  #   chart      = "secrets-store-csi-driver"
+  #   repository = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
+  #   version    = "1.3.1"
+  #   namespace  = "kube-system"
+  #   set_values = [
+  #     {
+  #       name  = "syncSecret.enabled"
+  #       value = "true"
+  #     },
+  #     {
+  #       name  = "enableSecretRotation"
+  #       value = "true"
+  #     }
+  #   ]
+  # }
+
+  # enable_secrets_store_csi_driver_provider_aws = false
+  # # csi_secrets_store_provider_aws_helm_config = {
+  # #   namespace = "kube-system"
+  # #   version   = "0.0.4"
+  # # }
 
   enable_metrics_server = false
 
@@ -88,34 +88,37 @@ module "eks_blueprints_kubernetes_addons" {
 # AWS Application load balancer
 #---------------------------------------------------------------
 
-resource "kubectl_manifest" "cluster_ingress" {
-  yaml_body = <<YAML
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: taly-ingress
-  labels:
-    type: ingress
-  annotations:
-    alb.ingress.kubernetes.io/subnets: ${replace(join(", ", module.vpc.public_subnets), "\"", "")}
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
-spec:
-  ingressClassName: alb
-  rules:
-    - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: backend-service
-                port:
-                  number: 5000
-YAML
+# resource "kubectl_manifest" "cluster_ingress" {
+#   yaml_body = <<YAML
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: taly-ingress
+#   labels:
+#     type: ingress
+#   annotations:
+#     alb.ingress.kubernetes.io/subnets: ${replace(join(", ", module.vpc.public_subnets), "\"", "")}
+#     alb.ingress.kubernetes.io/scheme: internet-facing
+#     alb.ingress.kubernetes.io/target-type: ip
+#     alb.ingress.kubernetes.io/certificate-arn: ${var.acm_arn}
+#     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+#     alb.ingress.kubernetes.io/ssl-redirect: '443'
+# spec:
+#   ingressClassName: alb
+#   rules:
+#     - http:
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: backend-service
+#                 port:
+#                   number: 5000
+# YAML
 
-  depends_on = [module.eks_blueprints_kubernetes_addons]
-}
+#   depends_on = [module.eks_blueprints_kubernetes_addons]
+# }
 
 
 #---------------------------------------------------------------
@@ -204,87 +207,87 @@ resource "aws_iam_policy" "cluster_secretstore" {
 POLICY
 }
 
-resource "kubectl_manifest" "cluster_secretstore" {
-  yaml_body = <<YAML
-apiVersion: secrets-store.csi.x-k8s.io/v1
-kind: SecretProviderClass
-metadata:
-  name: ${local.cluster_secretstore_name}
-spec:
-  provider: aws
-  parameters:
-    objects: |
-      - objectName: ${aws_secretsmanager_secret.fe_secrets.name}
-        objectType: "secretsmanager"
-        jmesPath:
-          - path: NEXT_PUBLIC_API_URL
-            objectAlias: api_endpoint
-          - path: NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID
-            objectAlias: google_auth
-      - objectName: ${aws_secretsmanager_secret.be_secrets.name}
-        objectType: "secretsmanager"
-        jmesPath:
-          - path: PORT
-            objectAlias: port
-          - path: MONGO_URL
-            objectAlias: mongo_endpoint
-          - path: GOOGLE_AUTH_CLIENT_ID
-            objectAlias: google_client
-          - path: ADMIN_EMAIL
-            objectAlias: admin_email
-          - path: JWT_SECRET
-            objectAlias: jwt
-          - path: FE_URL
-            objectAlias: fe_url
-          - path: BE_URL
-            objectAlias: be_url
-          - path: ADMIN_SESSION_SECRET
-            objectAlias: session_secret
-          - path: SENDGRID_API_KEY
-            objectAlias: sendgrid_api
-          - path: SENDGRID_FROM
-            objectAlias: sendgrid_from
-          - path: AWS_REGION
-            objectAlias: region
-          - path: AWS_BUCKET_NAME
-            objectAlias: bucket_name
+# resource "kubectl_manifest" "cluster_secretstore" {
+#   yaml_body = <<YAML
+# apiVersion: secrets-store.csi.x-k8s.io/v1
+# kind: SecretProviderClass
+# metadata:
+#   name: ${local.cluster_secretstore_name}
+# spec:
+#   provider: aws
+#   parameters:
+#     objects: |
+#       - objectName: ${aws_secretsmanager_secret.fe_secrets.name}
+#         objectType: "secretsmanager"
+#         jmesPath:
+#           - path: NEXT_PUBLIC_API_URL
+#             objectAlias: api_endpoint
+#           - path: NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID
+#             objectAlias: google_auth
+#       - objectName: ${aws_secretsmanager_secret.be_secrets.name}
+#         objectType: "secretsmanager"
+#         jmesPath:
+#           - path: PORT
+#             objectAlias: port
+#           - path: MONGO_URL
+#             objectAlias: mongo_endpoint
+#           - path: GOOGLE_AUTH_CLIENT_ID
+#             objectAlias: google_client
+#           - path: ADMIN_EMAIL
+#             objectAlias: admin_email
+#           - path: JWT_SECRET
+#             objectAlias: jwt
+#           - path: FE_URL
+#             objectAlias: fe_url
+#           - path: BE_URL
+#             objectAlias: be_url
+#           - path: ADMIN_SESSION_SECRET
+#             objectAlias: session_secret
+#           - path: SENDGRID_API_KEY
+#             objectAlias: sendgrid_api
+#           - path: SENDGRID_FROM
+#             objectAlias: sendgrid_from
+#           - path: AWS_REGION
+#             objectAlias: region
+#           - path: AWS_BUCKET_NAME
+#             objectAlias: bucket_name
 
-  secretObjects:
-    - secretName: frontendsecret
-      type: Opaque
-      data:
-        - objectName: api_endpoint
-          key: api_endpoint
-        - objectName: google_auth
-          key: google_auth
-    - secretName: backendsecret
-      type: Opaque
-      data:
-        - objectName: port
-          key: port
-        - objectName: mongo_endpoint
-          key: mongo_endpoint
-        - objectName: google_client
-          key: google_client
-        - objectName: admin_email
-          key: admin_email
-        - objectName: jwt
-          key: jwt
-        - objectName: fe_url
-          key: fe_url
-        - objectName: be_url
-          key: be_url
-        - objectName: session_secret
-          key: session_secret
-        - objectName: sendgrid_api
-          key: sendgrid_api
-        - objectName: sendgrid_from
-          key: sendgrid_from
-        - objectName: region
-          key: region
-        - objectName: bucket_name
-          key: bucket_name
-YAML
+#   secretObjects:
+#     - secretName: frontendsecret
+#       type: Opaque
+#       data:
+#         - objectName: api_endpoint
+#           key: api_endpoint
+#         - objectName: google_auth
+#           key: google_auth
+#     - secretName: backendsecret
+#       type: Opaque
+#       data:
+#         - objectName: port
+#           key: port
+#         - objectName: mongo_endpoint
+#           key: mongo_endpoint
+#         - objectName: google_client
+#           key: google_client
+#         - objectName: admin_email
+#           key: admin_email
+#         - objectName: jwt
+#           key: jwt
+#         - objectName: fe_url
+#           key: fe_url
+#         - objectName: be_url
+#           key: be_url
+#         - objectName: session_secret
+#           key: session_secret
+#         - objectName: sendgrid_api
+#           key: sendgrid_api
+#         - objectName: sendgrid_from
+#           key: sendgrid_from
+#         - objectName: region
+#           key: region
+#         - objectName: bucket_name
+#           key: bucket_name
+# YAML
 
-  depends_on = [module.eks_blueprints_kubernetes_addons]
-}
+#   depends_on = [module.eks_blueprints_kubernetes_addons]
+# }
