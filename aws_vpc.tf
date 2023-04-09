@@ -55,6 +55,25 @@ module "endpoints" {
       service         = "s3"
       route_table_ids = module.vpc.private_route_table_ids
       tags            = { Name = "s3-vpc-endpoint" }
+      policy          = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Principal": "*",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "${data.aws_s3_bucket.taly_video.arn}/*",
+        "${data.aws_s3_bucket.taly_video.arn}"
+      ],
+      "Effect": "Allow"
+    }
+  ]
+}
+POLICY
     }
   }
 

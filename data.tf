@@ -20,3 +20,11 @@ data "aws_eks_cluster_auth" "cluster" {
 data "aws_kms_key" "key" {
   key_id = "752b8f4f-b1b8-48b3-a981-603e90d2411c"
 }
+
+data "aws_s3_bucket" "taly_video" {
+  bucket = var.be_secrets.AWS_BUCKET_NAME
+}
+
+data "aws_ecrpublic_authorization_token" "token" {
+  provider = aws.virginia
+}

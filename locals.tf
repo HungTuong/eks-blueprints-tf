@@ -12,16 +12,27 @@ locals {
   # ADD-ON APPLICATION
   #---------------------------------------------------------------
 
-  # External secrets
-  cluster_secretstore_name = "secrets-store-csi"
-  cluster_secretstore_sa   = "secrets-store-csi-sa"
-  secretstore_sa           = "secretstore-sa"
+  cluster_s3_sa          = "s3-sa"
+  cluster_secretstore_sa = "secrets-store-csi-sa"
+  cluster_sa             = "cluster-sa"
   addon_application = {
     path               = "chart"
     repo_url           = "https://github.com/aws-samples/eks-blueprints-add-ons.git"
     add_on_application = true
   }
 
+
+  waf = {
+    # the priority in waf will be referenced to the order of the rules in the list
+    managed_rules = [
+      "AWSManagedRulesCommonRuleSet",
+      "AWSManagedRulesLinuxRuleSet",
+      "AWSManagedRulesKnownBadInputsRuleSet",
+      "AWSManagedRulesAmazonIpReputationList",
+      "AWSManagedRulesAnonymousIpList",
+      "AWSManagedRulesAdminProtectionRuleSet"
+    ]
+  }
   tags = {
     Terraform   = "True"
     Environment = "dev"

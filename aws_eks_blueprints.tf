@@ -71,18 +71,14 @@ module "eks_blueprints" {
       create_launch_template = true           # false will use the default launch template
       launch_template_os     = "bottlerocket" # amazonlinux2eks or bottlerocket
       public_ip              = false          # Use this to enable public IP for EC2 instances; only for public subnets used in launch templates ;
-      # 2> Node Group scaling configuration
-      desired_size = 1
-      max_size     = 2
-      min_size     = 1
 
-      # 3> Node Group IAM policy configuration
+      # 2> Node Group IAM policy configuration
       iam_role_additional_policies = {
         "ManagedEcr" : "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
         "ManagedSecrets" : "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
       }
 
-      # 4> Node Group compute configuration
+      # 3> Node Group compute configuration
       ami_type       = "BOTTLEROCKET_x86_64"                              # AL2_x86_64, AL2_x86_64_GPU, AL2_ARM_64, CUSTOM, BOTTLEROCKET_ARM_64, BOTTLEROCKET_x86_64
       capacity_type  = "SPOT"                                             # ON_DEMAND or SPOT
       instance_types = ["m5.large", "m4.large", "m6a.large", "m5a.large"] # List of instances to get capacity from multipe pools
@@ -90,11 +86,11 @@ module "eks_blueprints" {
         {
           device_name = "/dev/xvda"
           volume_type = "gp3"
-          volume_size = 20
+          volume_size = 10
         }
       ]
 
-      # 5> Node Group network configuration
+      # 4> Node Group network configuration
       subnet_type = "private"
       subnet_ids  = module.vpc.private_subnets # Defaults to private subnet-ids used by EKS Controle plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
 
