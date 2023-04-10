@@ -41,7 +41,7 @@ resource "aws_wafv2_web_acl" "alb_web_acl" {
     sampled_requests_enabled   = false
   }
 
-  tags = local.common_tags
+  tags = local.tags
 }
 
 resource "aws_wafv2_web_acl_logging_configuration" "alb_web_acl_log_config" {
@@ -62,7 +62,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields httpRequest.country\n| stats count(*) as requestCount by httpRequest.country\n| sort requestCount desc\n| limit 100",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "view": "pie",
                 "title": "Countries by number of requests"
@@ -76,7 +76,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | # fields @timestamp, @message\n# | sort @timestamp desc\n# | limit 20\n\n\nfields action, ruleGroupList.0.excludedRules.0.exclusionType\n| stats count(*) as Waf_Action by action, ruleGroupList.0.excludedRules.0.exclusionType\n| sort action desc\n| limit 100",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "title": "Allowed vs Blocked requests",
                 "view": "pie"
@@ -90,7 +90,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields httpRequest.country\n| stats count(*) as requestCount by httpRequest.country\n| sort requestCount desc\n| limit 10",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "title": "Top 10 countries",
                 "view": "table"
             }
@@ -103,7 +103,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields httpRequest.clientIp\n| stats count(*) as requestCount by httpRequest.clientIp\n| sort requestCount desc\n| limit 10",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "view": "table",
                 "title": "Top 10 ip addresses"
@@ -117,7 +117,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields @timestamp, @message\n| parse @message '{\"name\":\"User-Agent\",\"value\":\"*\"}' as userAgent\n| stats count(*) as requestCount by userAgent\n| sort requestCount desc\n| limit 10",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "view": "table",
                 "title": " Top 10 user-agents"
@@ -131,7 +131,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields @timestamp, @message\n| parse @message '{\"name\":\"Host\",\"value\":\"*\"}' as host\n| stats count(*) as requestCount by host\n| sort requestCount desc\n| limit 10",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "title": "Top 10 hosts",
                 "view": "table"
@@ -145,7 +145,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields terminatingRuleId\n| stats count(*) as requestCount by terminatingRuleId\n| sort requestCount desc\n| limit 10",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "view": "table",
                 "title": "Top 10 terminating rules"
@@ -159,7 +159,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields httpRequest.uri\n| stats count(*) as requestCount by httpRequest.uri\n| sort requestCount desc\n| limit 20",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "view": "table",
                 "title": "Top 20 URI"
@@ -173,7 +173,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields action, ruleGroupList.0.excludedRules.0.exclusionType\n| stats count(*) as requestCount by action, ruleGroupList.0.excludedRules.0.exclusionType\n| sort requestCount desc\n| limit 100",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "title": "Allowed vs Blocked Requests",
                 "view": "bar"
@@ -187,7 +187,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields @action\n| stats count(*) as requestCount",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "title": "All Requests",
                 "view": "table"
@@ -201,7 +201,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields @action\n| filter action=\"BLOCK\"\n| stats count(*)",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "title": "Blocked Requests",
                 "view": "table"
@@ -215,7 +215,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields @httpRequest.httpMethod\n| stats count(*) as httpMethod by httpRequest.httpMethod\n| sort requestCount desc",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "view": "pie",
                 "title": "HTTP Methods"
@@ -229,7 +229,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields action, ruleGroupList.0.terminatingRule.ruleId, ruleGroupList.1.terminatingRule.ruleId, ruleGroupList.2.terminatingRule.ruleId, ruleGroupList.3.terminatingRule.ruleId\n| filter action=\"BLOCK\"\n| sort @timestamp desc",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "view": "table",
                 "title": "BlockedRequestsByRuleID"
@@ -243,7 +243,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields @action\n| filter action=\"ALLOW\" and ruleGroupList.0.excludedRules.0.exclusionType!=\"EXCLUDED_AS_COUNT\"\n| stats count(*)",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "title": "Allowed Requests",
                 "view": "table"
@@ -257,7 +257,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields @action\n| filter action=\"ALLOW\" and ruleGroupList.0.excludedRules.0.exclusionType=\"EXCLUDED_AS_COUNT\"\n| stats count(*)",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "title": "Allowed as Counted",
                 "view": "table"
@@ -271,7 +271,7 @@ resource "aws_cloudwatch_dashboard" "alb_web_acl_cw_dashboard" {
             "type": "log",
             "properties": {
                 "query": "SOURCE '${aws_cloudwatch_log_group.aws_waf_log_alb.name}' | fields @timestamp, action as WAF_ACTION, httpRequest.uri as uri, httpRequest.country as country\n| parse @message '{\"name\":\"Host\",\"value\":\"*\"}' as host\n| parse @message '{\"exclusionType\":\"EXCLUDED_AS_COUNT\",\"ruleId\":\"*\"}' as EXCLUDED_AS_COUNT_RuleId\n| filter ispresent(EXCLUDED_AS_COUNT_RuleId)\n| limit 100",
-                "region": "${var.region}",
+                "region": "${local.region}",
                 "stacked": false,
                 "title": "EXCLUDED_AS_COUNT Requests",
                 "view": "table"

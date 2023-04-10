@@ -4,6 +4,7 @@ locals {
   region          = data.aws_region.current.name
   cluster_version = "1.25"
   namespace       = "default"
+  node_group_name = "btl-x86"
 
   vpc_cidr = "10.0.0.0/16"
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)

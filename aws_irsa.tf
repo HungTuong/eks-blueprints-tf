@@ -44,11 +44,6 @@ resource "aws_secretsmanager_secret_version" "be" {
 
 resource "aws_s3_bucket_policy" "s3_vpce_policy" {
   bucket = var.be_secrets.AWS_BUCKET_NAME
-  policy = data.aws_iam_policy_document.s3_vpce_policy.json
-}
-
-resource "aws_s3_bucket_policy" "s3_vpce_policy" {
-  bucket = var.be_secrets.AWS_BUCKET_NAME
   policy = <<POLICY
 {
   "Version": "2012-10-17",
@@ -63,7 +58,7 @@ resource "aws_s3_bucket_policy" "s3_vpce_policy" {
       "Effect": "Allow",
       "Condition": {
         "StringEquals": {
-          "aws:sourceVpce": "${module.endpoints.endpoints[0].id}"
+          "aws:sourceVpce": "${module.endpoints.endpoints.s3.id}"
         }
       }
     }

@@ -68,8 +68,8 @@ module "eks_blueprints_kubernetes_addons" {
 module "karpenter" {
   source = "terraform-aws-modules/eks/aws//modules/karpenter"
 
-  cluster_name           = module.eks_blueprints.cluster_name
-  irsa_oidc_provider_arn = module.eks_blueprints.oidc_provider_arn
+  cluster_name           = module.eks_blueprints.eks_cluster_id
+  irsa_oidc_provider_arn = module.eks_blueprints.eks_oidc_provider_arn
   create_irsa            = false # IRSA will be created by the kubernetes-addons module
 
   tags = local.tags
@@ -83,31 +83,24 @@ resource "kubectl_manifest" "karpenter_node_template" {
     metadata:
       name: karpenter-default
     spec:
+      instanceProfile: "${local.project}-${local.node_group_name}"
       amiFamily: Bottlerocket
       blockDeviceMappings:
       # Root device
       - deviceName: /dev/xvda
         ebs:
-          volumeSize: 10Gi
-          volumeType: gp3
-          encrypted: true
-          deleteOnTermination: true
-      # Data device: Container resources such as images and logs
-      - deviceName: /dev/xvdb
-        ebs:
           volumeSize: 20Gi
           volumeType: gp3
           encrypted: true
+          deleteOnTermination: true
       subnetSelector:
-        karpenter.sh/discovery: ${module.eks_blueprints.cluster_name}
-        # kubernetes.io/cluster/${module.eks_blueprints.cluster_name}: '*'
-        # kubernetes.io/role/internal-elb: '1' # to select only private subnets
+        kubernetes.io/cluster/${module.eks_blueprints.eks_cluster_id}: '*'
+        kubernetes.io/role/internal-elb: '1' # to select only private subnets
       securityGroupSelector:
-        karpenter.sh/discovery: ${module.eks_blueprints.cluster_name}
-        # aws:eks:cluster-name: ${module.eks_blueprints.cluster_name}
-      instanceProfile: ${module.karpenter.instance_profile_name}
+        Name: "*node*"
       tags:
-        karpenter.sh/cluster_name: ${module.eks_blueprints.cluster_name}
+        karpenter.sh/cluster_name: ${module.eks_blueprints.eks_cluster_id}
+        Name: thesis-btl-x86
       metadataOptions:
         httpEndpoint: enabled
         httpProtocolIPv6: disabled
@@ -130,10 +123,10 @@ resource "kubectl_manifest" "karpenter_provisioner" {
       requirements:
         - key: "karpenter.k8s.aws/instance-category"
           operator: In
-          values: ["c", "m", "r", "t]
+          values: ["c", "m", "r", "t"]
         - key: "karpenter.k8s.aws/instance-cpu"
           operator: In
-          values: ["4", "8", "16"]
+          values: ["2", "4"]
         - key: "karpenter.k8s.aws/instance-hypervisor"
           operator: In
           values: ["nitro"]
@@ -146,17 +139,16 @@ resource "kubectl_manifest" "karpenter_provisioner" {
         - key: "karpenter.sh/capacity-type" # If not included, the webhook for the AWS cloud provider will default to on-demand
           operator: In
           values: ["spot"]
-      kubeletConfiguration:
-        containerRuntime: containerd
-        maxPods: 110
       limits:
         resources:
           cpu: "16"
           memory: 64Gi
+      labels:
+        type: karpenter
       consolidation:
         enabled: true
       providerRef:
-        name: default
+        name: karpenter-default
       ttlSecondsUntilExpired: 2592000 # 30 Days = 60 * 60 * 24 * 30 Seconds
   YAML
 
