@@ -24,13 +24,13 @@ resource "aws_wafv2_web_acl" "alb_web_acl" {
           name        = rule.value
           vendor_name = "AWS"
 
-          rule_action_override {
-            action_to_use {
-              count {}
-            }
+          # rule_action_override {
+          #   action_to_use {
+          #     count {}
+          #   }
 
-            name = "AdminProtection_URIPATH"
-          }
+          #   name = "AdminProtection_URIPATH"
+          # }
         }
       }
 

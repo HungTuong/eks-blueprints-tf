@@ -26,8 +26,9 @@ locals {
   waf = {
     # the priority in waf will be referenced to the order of the rules in the list
     managed_rules = [
-      "AWSManagedRulesAdminProtectionRuleSet",
       "AWSManagedRulesCommonRuleSet",
+      "AWSManagedRulesAdminProtectionRuleSet",
+      "AWSManagedRulesSQLiRuleSet",
       "AWSManagedRulesLinuxRuleSet",
       "AWSManagedRulesKnownBadInputsRuleSet",
       "AWSManagedRulesAmazonIpReputationList",
