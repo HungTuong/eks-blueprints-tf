@@ -2,7 +2,7 @@ locals {
   project         = "thesis"
   iam_name        = "hungt.iam"
   region          = data.aws_region.current.name
-  cluster_version = "1.25"
+  cluster_version = "1.26"
   namespace       = "default"
   node_group_name = "btl-x86"
 
@@ -26,12 +26,12 @@ locals {
   waf = {
     # the priority in waf will be referenced to the order of the rules in the list
     managed_rules = [
+      "AWSManagedRulesAdminProtectionRuleSet",
       "AWSManagedRulesCommonRuleSet",
       "AWSManagedRulesLinuxRuleSet",
       "AWSManagedRulesKnownBadInputsRuleSet",
       "AWSManagedRulesAmazonIpReputationList",
-      "AWSManagedRulesAnonymousIpList",
-      "AWSManagedRulesAdminProtectionRuleSet"
+      "AWSManagedRulesAnonymousIpList"
     ]
   }
   tags = {

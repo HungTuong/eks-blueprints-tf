@@ -28,3 +28,7 @@ data "aws_s3_bucket" "taly_video" {
 data "aws_ecrpublic_authorization_token" "token" {
   provider = aws.virginia
 }
+
+data "aws_cloudfront_distribution" "frontend" {
+  id = "E3THX1BMLK2B2Y"
+}

@@ -48,7 +48,7 @@ module "eks_blueprints_kubernetes_addons" {
   karpenter_node_iam_instance_profile        = module.karpenter.instance_profile_name
   karpenter_enable_spot_termination_handling = true
 
-  enable_metrics_server = false
+  enable_metrics_server = true
 
 }
 

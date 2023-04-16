@@ -59,13 +59,22 @@ module "eks_blueprints" {
       description                   = "Allow access from control plane to webhook port of AWS load balancer controller."
     }
 
-    ingress_nodes_karpenter_ports_tcp = {
-      description                = "Karpenter readiness"
-      protocol                   = "tcp"
-      from_port                  = 8443
-      to_port                    = 8443
-      type                       = "ingress"
-      source_node_security_group = true
+    # ingress_nodes_karpenter_ports_tcp = {
+    #   description                = "Karpenter readiness"
+    #   protocol                   = "tcp"
+    #   from_port                  = 8443
+    #   to_port                    = 8443
+    #   type                       = "ingress"
+    #   source_node_security_group = true
+    # }
+
+    metrics_server_allow_from_control_plane = {
+      type                          = "ingress"
+      protocol                      = "tcp"
+      from_port                     = 4443
+      to_port                       = 4443
+      source_cluster_security_group = true
+      description                   = "Allow access from control plane to metrics server webhook"
     }
 
     ingress_allow_karpenter_webhook_access_from_control_plane = {
@@ -102,9 +111,9 @@ module "eks_blueprints" {
       }
 
       # 4> Node Group compute configuration
-      ami_type       = "BOTTLEROCKET_x86_64"                     # AL2_x86_64, AL2_x86_64_GPU, AL2_ARM_64, CUSTOM, BOTTLEROCKET_ARM_64, BOTTLEROCKET_x86_64
-      capacity_type  = "SPOT"                                    # ON_DEMAND or SPOT
-      instance_types = ["t4g.medium", "t3.medium", "t3a.medium"] # List of instances to get capacity from multipe pools
+      ami_type       = "BOTTLEROCKET_x86_64"                              # AL2_x86_64, AL2_x86_64_GPU, AL2_ARM_64, CUSTOM, BOTTLEROCKET_ARM_64, BOTTLEROCKET_x86_64
+      capacity_type  = "SPOT"                                             # ON_DEMAND or SPOT
+      instance_types = ["m5.large", "m4.large", "m6a.large", "m5a.large"] # List of instances to get capacity from multipe pools
       block_device_mappings = [
         {
           device_name = "/dev/xvdb"
