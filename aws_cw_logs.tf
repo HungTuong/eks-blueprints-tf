@@ -1,7 +1,6 @@
 resource "aws_cloudwatch_log_group" "aws_waf_log" {
-  name         = "aws-waf-logs-${local.project}"
-  skip_destroy = true
-  tags         = local.tags
+  name = "aws-waf-logs-${local.project}"
+  tags = local.tags
 }
 
 

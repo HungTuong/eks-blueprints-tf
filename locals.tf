@@ -21,7 +21,7 @@ locals {
     repo_url           = "https://github.com/aws-samples/eks-blueprints-add-ons.git"
     add_on_application = true
   }
-
+  domain = "talyvn.com"
 
   waf = {
     # the priority in waf will be referenced to the order of the rules in the list

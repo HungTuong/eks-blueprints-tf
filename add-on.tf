@@ -40,7 +40,16 @@ module "eks_blueprints_kubernetes_addons" {
 
 
   enable_aws_load_balancer_controller = true
-  enable_karpenter                    = true
+  aws_load_balancer_controller_helm_config = {
+    version = "1.5.1"
+    # set_values = [
+    #   {
+    #     name  = "createIngressClassResource"
+    #     value = "false"
+    #   }
+    # ]
+  }
+  enable_karpenter = true
   karpenter_helm_config = {
     repository_username = data.aws_ecrpublic_authorization_token.token.user_name
     repository_password = data.aws_ecrpublic_authorization_token.token.password
@@ -48,8 +57,10 @@ module "eks_blueprints_kubernetes_addons" {
   karpenter_node_iam_instance_profile        = module.karpenter.instance_profile_name
   karpenter_enable_spot_termination_handling = true
 
-  enable_metrics_server = true
+  enable_external_dns            = true
+  external_dns_route53_zone_arns = [data.aws_route53_zone.domain.arn]
 
+  enable_metrics_server = true
 }
 
 #Wait about 2 minutes for the LoadBalancer creation, and get it's URL:

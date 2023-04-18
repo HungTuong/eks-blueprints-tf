@@ -100,9 +100,10 @@ module "eks_blueprints" {
       public_ip              = false                 # Use this to enable public IP for EC2 instances; only for public subnets used in launch templates ;
 
       # 2> Node Group scaling configuration
+      # desized and min >= 2 for karpenter
       desired_size = 2
-      max_size     = 2
       min_size     = 2
+      max_size     = 2
 
       # 3> Node Group IAM policy configuration
       iam_role_additional_policies = {

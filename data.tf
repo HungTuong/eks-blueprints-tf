@@ -32,3 +32,7 @@ data "aws_ecrpublic_authorization_token" "token" {
 data "aws_cloudfront_distribution" "frontend" {
   id = "E3THX1BMLK2B2Y"
 }
+
+data "aws_route53_zone" "domain" {
+  name = local.domain
+}
