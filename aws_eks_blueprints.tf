@@ -23,11 +23,11 @@ module "eks_blueprints" {
 
   # EKS MANAGED NODE GROUPS
   node_security_group_additional_rules = {
-    ingress_self_front_end = {
-      description = "Allow FE access within node groups"
+    ingress_self_grafana = {
+      description = "Allow grafana access within node groups"
       protocol    = "tcp"
-      from_port   = 8000
-      to_port     = 8000
+      from_port   = 3000
+      to_port     = 3000
       type        = "ingress"
       self        = true
     }
@@ -58,15 +58,6 @@ module "eks_blueprints" {
       source_cluster_security_group = true
       description                   = "Allow access from control plane to webhook port of AWS load balancer controller."
     }
-
-    # ingress_nodes_karpenter_ports_tcp = {
-    #   description                = "Karpenter readiness"
-    #   protocol                   = "tcp"
-    #   from_port                  = 8443
-    #   to_port                    = 8443
-    #   type                       = "ingress"
-    #   source_node_security_group = true
-    # }
 
     metrics_server_allow_from_control_plane = {
       type                          = "ingress"
@@ -101,8 +92,8 @@ module "eks_blueprints" {
 
       # 2> Node Group scaling configuration
       # desized and min >= 2 for karpenter
-      desired_size = 2
-      min_size     = 2
+      desired_size = 1
+      min_size     = 1
       max_size     = 2
 
       # 3> Node Group IAM policy configuration
@@ -112,9 +103,9 @@ module "eks_blueprints" {
       }
 
       # 4> Node Group compute configuration
-      ami_type       = "BOTTLEROCKET_x86_64"                              # AL2_x86_64, AL2_x86_64_GPU, AL2_ARM_64, CUSTOM, BOTTLEROCKET_ARM_64, BOTTLEROCKET_x86_64
-      capacity_type  = "SPOT"                                             # ON_DEMAND or SPOT
-      instance_types = ["m5.large", "m4.large", "m6a.large", "m5a.large"] # List of instances to get capacity from multipe pools
+      ami_type       = "BOTTLEROCKET_x86_64"                     # AL2_x86_64, AL2_x86_64_GPU, AL2_ARM_64, CUSTOM, BOTTLEROCKET_ARM_64, BOTTLEROCKET_x86_64
+      capacity_type  = "SPOT"                                    # ON_DEMAND or SPOT
+      instance_types = ["m5.xlarge", "m6a.xlarge", "m5a.xlarge"] # List of instances to get capacity from multipe pools
       block_device_mappings = [
         {
           device_name = "/dev/xvdb"
