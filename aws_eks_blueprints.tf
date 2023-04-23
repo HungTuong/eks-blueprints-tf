@@ -138,7 +138,7 @@ module "eks_blueprints" {
       instance_types = ["m5.xlarge", "m4.xlarge", "m6a.xlarge", "m5a.xlarge"] # List of instances to get capacity from multipe pools
       block_device_mappings = [
         {
-          device_name = "/dev/xvdb"
+          device_name = "/dev/xvda"
           volume_type = "gp3"
           volume_size = 20
           encrypted   = true
