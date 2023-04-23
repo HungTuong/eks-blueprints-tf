@@ -23,11 +23,39 @@ module "eks_blueprints" {
 
   # EKS MANAGED NODE GROUPS
   node_security_group_additional_rules = {
+    # ingress rules
     ingress_self_grafana = {
       description = "Allow grafana access within node groups"
       protocol    = "tcp"
       from_port   = 3000
       to_port     = 3000
+      type        = "ingress"
+      self        = true
+    }
+
+    ingress_self_prometheus = {
+      description = "Allow grafana access prometheus within node groups"
+      protocol    = "tcp"
+      from_port   = 9090
+      to_port     = 9090
+      type        = "ingress"
+      self        = true
+    }
+
+    ingress_self_coredns_metrics = {
+      description = "Allow prometheus access coredns within node groups"
+      protocol    = "tcp"
+      from_port   = 9153
+      to_port     = 9153
+      type        = "ingress"
+      self        = true
+    }
+
+    ingress_self_kube_state_metrics = {
+      description = "Allow prometheus access kube_state within node groups"
+      protocol    = "tcp"
+      from_port   = 8080
+      to_port     = 8080
       type        = "ingress"
       self        = true
     }
@@ -39,15 +67,6 @@ module "eks_blueprints" {
       to_port     = 5000
       type        = "ingress"
       self        = true
-    }
-
-    egress_to_mongodb = {
-      description = "Node to mongoDB"
-      protocol    = "tcp"
-      from_port   = 27017
-      to_port     = 27017
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
     }
 
     ingress_allow_access_from_control_plane = {
@@ -76,6 +95,17 @@ module "eks_blueprints" {
       type                          = "ingress"
       source_cluster_security_group = true
     }
+
+    # egress rules
+    egress_to_mongodb = {
+      description = "Node to mongoDB"
+      protocol    = "tcp"
+      from_port   = 27017
+      to_port     = 27017
+      type        = "egress"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
   }
 
   managed_node_groups = {
@@ -92,8 +122,8 @@ module "eks_blueprints" {
 
       # 2> Node Group scaling configuration
       # desized and min >= 2 for karpenter
-      desired_size = 1
-      min_size     = 1
+      desired_size = 2
+      min_size     = 2
       max_size     = 2
 
       # 3> Node Group IAM policy configuration

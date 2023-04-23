@@ -61,7 +61,13 @@ resource "aws_s3_bucket_policy" "s3_vpce_policy" {
           "aws:sourceVpce": "${module.endpoints.endpoints.s3.id}"
         }
       }
-    }
+    },
+    {
+			"Effect": "Allow",
+			"Principal": "*",
+			"Action": "s3:GetObject",
+			"Resource": "${data.aws_s3_bucket.taly_video.arn}/*"
+		}
   ]
 }
 POLICY

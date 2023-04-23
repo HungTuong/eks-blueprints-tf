@@ -41,7 +41,7 @@ module "eks_blueprints_kubernetes_addons" {
 
   enable_aws_load_balancer_controller = true
   aws_load_balancer_controller_helm_config = {
-    version = "1.5.1"
+    version = "1.5.2"
   }
   enable_karpenter = true
   karpenter_helm_config = {
