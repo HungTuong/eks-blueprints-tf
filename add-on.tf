@@ -10,40 +10,10 @@ module "eks_blueprints_kubernetes_addons" {
   # cluster_endpoint  = module.eks_blueprints.eks_cluster_endpoint
   # cluster_version   = local.cluster_version
 
-
-
-  #   #---------------------------------------------------------------
-  #   # ARGO CD ADD-ON
-  #   #---------------------------------------------------------------
-
-  #   enable_argocd         = false
-  #   argocd_manage_add_ons = false # Indicates that ArgoCD is responsible for managing/deploying Add-ons.
-
-  #   argocd_applications = {
-  #     addons = local.addon_application
-  #     #workloads = local.workload_application #We comment it for now
-  #   }
-
-  #   argocd_helm_config = {
-  #     set = [
-  #       {
-  #         name  = "server.service.type"
-  #         value = "LoadBalancer"
-  #       }
-  #     ]
-  #   }
-
-  #---------------------------------------------------------------
-  # ADD-ONS - You can add additional addons here
-  # https://aws-ia.github.io/terraform-aws-eks-blueprints/add-ons/
-  #---------------------------------------------------------------
-
+  enable_argocd = false
 
   enable_aws_load_balancer_controller = true
-  aws_load_balancer_controller_helm_config = {
-    version = "1.5.2"
-  }
-  enable_karpenter = true
+  enable_karpenter                    = true
   karpenter_helm_config = {
     repository_username = data.aws_ecrpublic_authorization_token.token.user_name
     repository_password = data.aws_ecrpublic_authorization_token.token.password
@@ -54,18 +24,17 @@ module "eks_blueprints_kubernetes_addons" {
   enable_external_dns = true
   eks_cluster_domain  = local.domain
 
-  enable_metrics_server = true
-
+  enable_metrics_server                = true
   enable_amazon_eks_aws_ebs_csi_driver = true
 }
 
-#Wait about 2 minutes for the LoadBalancer creation, and get it's URL:
-####export ARGOCD_SERVER=`kubectl get svc argo-cd-argocd-server -n argocd -o json | jq --raw-output '.status.loadBalancer.ingress[0].hostname'`
-####echo "https://$ARGOCD_SERVER"
+# #Wait about 2 minutes for the LoadBalancer creation, and get it's URL:
+# ####export ARGOCD_SERVER=`kubectl get svc argo-cd-argocd-server -n argocd -o json | jq --raw-output '.status.loadBalancer.ingress[0].hostname'`
+# ####echo "https://$ARGOCD_SERVER"
 
-#----------------------------------
-#Query for ArgoCD admin password
-#kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+# #----------------------------------
+# #Query for ArgoCD admin password
+# #kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 
 
 ################################################################################
@@ -133,7 +102,7 @@ resource "kubectl_manifest" "karpenter_provisioner" {
           values: ["c", "m", "r", "t"]
         - key: "karpenter.k8s.aws/instance-cpu"
           operator: In
-          values: ["2", "4"]
+          values: ["4"]
         - key: "karpenter.k8s.aws/instance-hypervisor"
           operator: In
           values: ["nitro"]
@@ -152,11 +121,10 @@ resource "kubectl_manifest" "karpenter_provisioner" {
           memory: 64Gi
       labels:
         type: karpenter
-      consolidation:
-        enabled: true
       providerRef:
         name: karpenter-default
       ttlSecondsUntilExpired: 2592000 # 30 Days = 60 * 60 * 24 * 30 Seconds
+      ttlSecondsAfterEmpty: 30
   YAML
 
   depends_on = [

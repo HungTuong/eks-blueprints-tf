@@ -1,40 +1,29 @@
 #---------------------------------------------------------------
 # AWS Secret
-#---------------------------------------------------------------
-resource "aws_secretsmanager_secret" "fe_secrets" {
-  name                    = "TALY_FE_ENV"
-  description             = "Environment secrets for application front end"
-  recovery_window_in_days = 0
-}
+# #---------------------------------------------------------------
 resource "aws_secretsmanager_secret" "be_secrets" {
   name                    = "TALY_BE_ENV"
   description             = "Environment secrets for application back end"
   recovery_window_in_days = 0
 }
 
-resource "aws_secretsmanager_secret_version" "fe" {
-  secret_id = aws_secretsmanager_secret.fe_secrets.id
-  secret_string = jsonencode({
-    NEXT_PUBLIC_API_URL               = var.fe_secrets.NEXT_PUBLIC_API_URL,
-    NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID = var.fe_secrets.NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID
-  })
-}
-
 resource "aws_secretsmanager_secret_version" "be" {
   secret_id = aws_secretsmanager_secret.be_secrets.id
   secret_string = jsonencode({
-    PORT                  = var.be_secrets.PORT,
-    MONGO_URL             = var.be_secrets.MONGO_URL,
-    GOOGLE_AUTH_CLIENT_ID = var.be_secrets.GOOGLE_AUTH_CLIENT_ID,
-    ADMIN_EMAIL           = var.be_secrets.ADMIN_EMAIL,
-    JWT_SECRET            = var.be_secrets.JWT_SECRET,
-    FE_URL                = var.be_secrets.FE_URL,
-    BE_URL                = var.be_secrets.BE_URL,
-    ADMIN_SESSION_SECRET  = var.be_secrets.ADMIN_SESSION_SECRET,
-    SENDGRID_API_KEY      = var.be_secrets.SENDGRID_API_KEY,
-    SENDGRID_FROM         = var.be_secrets.SENDGRID_FROM,
-    AWS_REGION            = var.be_secrets.AWS_REGION,
-    AWS_BUCKET_NAME       = var.be_secrets.AWS_BUCKET_NAME
+    PORT                      = var.be_secrets.PORT,
+    MONGO_URL                 = var.be_secrets.MONGO_URL,
+    GOOGLE_AUTH_CLIENT_ID     = var.be_secrets.GOOGLE_AUTH_CLIENT_ID,
+    GOOGLE_AUTH_CLIENT_SECRET = var.be_secrets.GOOGLE_AUTH_CLIENT_SECRET,
+    GOOGLE_API_KEY            = var.be_secrets.GOOGLE_API_KEY,
+    ADMIN_EMAIL               = var.be_secrets.ADMIN_EMAIL,
+    JWT_SECRET                = var.be_secrets.JWT_SECRET,
+    FE_URL                    = var.be_secrets.FE_URL,
+    BE_URL                    = var.be_secrets.BE_URL,
+    ADMIN_SESSION_SECRET      = var.be_secrets.ADMIN_SESSION_SECRET,
+    SENDGRID_API_KEY          = var.be_secrets.SENDGRID_API_KEY,
+    SENDGRID_FROM             = var.be_secrets.SENDGRID_FROM,
+    AWS_REGION                = var.be_secrets.AWS_REGION,
+    AWS_BUCKET_NAME           = var.be_secrets.AWS_BUCKET_NAME
   })
 }
 
@@ -110,7 +99,6 @@ resource "aws_iam_policy" "cluster_secretstore" {
       "secretsmanager:ListSecretVersionIds"
     ],
     "Resource": [
-      "${aws_secretsmanager_secret.fe_secrets.arn}",
       "${aws_secretsmanager_secret.be_secrets.arn}"
     ]
     },
