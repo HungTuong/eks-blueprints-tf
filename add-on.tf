@@ -13,7 +13,9 @@ module "eks_blueprints_kubernetes_addons" {
   enable_argocd = false
 
   enable_aws_load_balancer_controller = true
-  enable_karpenter                    = true
+
+  # Enable karpenter last
+  enable_karpenter = false
   karpenter_helm_config = {
     repository_username = data.aws_ecrpublic_authorization_token.token.user_name
     repository_password = data.aws_ecrpublic_authorization_token.token.password
