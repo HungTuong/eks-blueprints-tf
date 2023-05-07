@@ -42,6 +42,15 @@ module "eks_blueprints" {
       self        = true
     }
 
+    ingress_self_cost_metrics = {
+      description = "Allow kubecost access cost metrics within node groups"
+      protocol    = "tcp"
+      from_port   = 9003
+      to_port     = 9003
+      type        = "ingress"
+      self        = true
+    }
+
     ingress_self_coredns_metrics = {
       description = "Allow prometheus access coredns within node groups"
       protocol    = "tcp"
@@ -56,6 +65,33 @@ module "eks_blueprints" {
       protocol    = "tcp"
       from_port   = 8080
       to_port     = 8080
+      type        = "ingress"
+      self        = true
+    }
+
+    ingress_self_repo_server = {
+      description = "Allow ArgoCD port within node groups"
+      protocol    = "tcp"
+      from_port   = 8081
+      to_port     = 8081
+      type        = "ingress"
+      self        = true
+    }
+
+    ingress_self_redis_server = {
+      description = "Allow ArgoCD port within node groups"
+      protocol    = "tcp"
+      from_port   = 6379
+      to_port     = 6379
+      type        = "ingress"
+      self        = true
+    }
+
+    ingress_self_node_exporter_metrics = {
+      description = "Allow prometheus access node exporter within node groups"
+      protocol    = "tcp"
+      from_port   = 9100
+      to_port     = 9100
       type        = "ingress"
       self        = true
     }
@@ -106,6 +142,60 @@ module "eks_blueprints" {
       cidr_blocks = ["0.0.0.0/0"]
     }
 
+    egress_self_repo_server = {
+      description = "Allow ArgoCD port within node groups"
+      protocol    = "tcp"
+      from_port   = 8081
+      to_port     = 8081
+      type        = "egress"
+      self        = true
+    }
+
+    egress_self_redis_server = {
+      description = "Allow ArgoCD port within node groups"
+      protocol    = "tcp"
+      from_port   = 6379
+      to_port     = 6379
+      type        = "egress"
+      self        = true
+    }
+
+    egress_self_coredns_metrics = {
+      description = "Allow prometheus access coredns within node groups"
+      protocol    = "tcp"
+      from_port   = 9153
+      to_port     = 9153
+      type        = "egress"
+      self        = true
+    }
+
+    egress_self_node_exporter_metrics = {
+      description = "Allow prometheus access node exporter within node groups"
+      protocol    = "tcp"
+      from_port   = 9100
+      to_port     = 9100
+      type        = "egress"
+      self        = true
+    }
+
+    egress_self_kube_state_metrics = {
+      description = "Allow prometheus access kube_state within node groups"
+      protocol    = "tcp"
+      from_port   = 8080
+      to_port     = 8080
+      type        = "egress"
+      self        = true
+    }
+
+    egress_self_cost_metrics = {
+      description = "Allow kubecost access cost metrics within node groups"
+      protocol    = "tcp"
+      from_port   = 9003
+      to_port     = 9003
+      type        = "egress"
+      self        = true
+    }
+
   }
 
   managed_node_groups = {
@@ -123,7 +213,7 @@ module "eks_blueprints" {
       # 2> Node Group scaling configuration
       # desized and min >= 2 for karpenter
       desired_size = 2
-      min_size     = 2
+      min_size     = 0
       max_size     = 2
 
       # 3> Node Group IAM policy configuration

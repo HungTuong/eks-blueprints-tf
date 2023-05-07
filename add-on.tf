@@ -10,18 +10,22 @@ module "eks_blueprints_kubernetes_addons" {
   # cluster_endpoint  = module.eks_blueprints.eks_cluster_endpoint
   # cluster_version   = local.cluster_version
 
-  enable_argocd = false
+  # enable_argocd = false
 
   enable_aws_load_balancer_controller = true
 
   # Enable karpenter last
-  enable_karpenter = false
+  enable_karpenter = true
+
   karpenter_helm_config = {
     repository_username = data.aws_ecrpublic_authorization_token.token.user_name
     repository_password = data.aws_ecrpublic_authorization_token.token.password
   }
   karpenter_node_iam_instance_profile        = module.karpenter.instance_profile_name
   karpenter_enable_spot_termination_handling = true
+  karpenter_irsa_policies = [
+    aws_iam_policy.karpenter.arn
+  ]
 
   enable_external_dns = true
   eks_cluster_domain  = local.domain
@@ -125,8 +129,9 @@ resource "kubectl_manifest" "karpenter_provisioner" {
         type: karpenter
       providerRef:
         name: karpenter-default
-      ttlSecondsUntilExpired: 2592000 # 30 Days = 60 * 60 * 24 * 30 Seconds
-      ttlSecondsAfterEmpty: 30
+      ttlSecondsUntilExpired: 300 # 5m
+      consolidation:
+        enabled: true
   YAML
 
   depends_on = [

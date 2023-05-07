@@ -135,3 +135,24 @@ resource "aws_iam_policy" "cluster_s3" {
 }
 POLICY
 }
+
+resource "aws_iam_policy" "karpenter" {
+  name_prefix = local.karpenter_sa
+  policy      = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+    "Effect": "Allow",
+    "Action": [
+      "ec2:TerminateInstances"
+    ],
+      "Resource": [
+        "arn:aws:ec2:${local.region}:${data.aws_caller_identity.current.account_id}:*",
+        "arn:aws:ec2:${local.region}::image/*"
+      ]
+    }
+  ]
+}
+POLICY
+}

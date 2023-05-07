@@ -16,6 +16,7 @@ locals {
   cluster_s3_sa          = "s3-sa"
   cluster_secretstore_sa = "secrets-store-csi-sa"
   cluster_sa             = "cluster-sa"
+  karpenter_sa           = "karpenter"
   addon_application = {
     path               = "chart"
     repo_url           = "https://github.com/aws-samples/eks-blueprints-add-ons.git"
