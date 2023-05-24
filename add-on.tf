@@ -10,12 +10,8 @@ module "eks_blueprints_kubernetes_addons" {
   # cluster_endpoint  = module.eks_blueprints.eks_cluster_endpoint
   # cluster_version   = local.cluster_version
 
-  # enable_argocd = false
-
   enable_aws_load_balancer_controller = true
-
-  # Enable karpenter last
-  enable_karpenter = true
+  enable_karpenter                    = true
 
   karpenter_helm_config = {
     repository_username = data.aws_ecrpublic_authorization_token.token.user_name
@@ -34,13 +30,6 @@ module "eks_blueprints_kubernetes_addons" {
   enable_amazon_eks_aws_ebs_csi_driver = true
 }
 
-# #Wait about 2 minutes for the LoadBalancer creation, and get it's URL:
-# ####export ARGOCD_SERVER=`kubectl get svc argo-cd-argocd-server -n argocd -o json | jq --raw-output '.status.loadBalancer.ingress[0].hostname'`
-# ####echo "https://$ARGOCD_SERVER"
-
-# #----------------------------------
-# #Query for ArgoCD admin password
-# #kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 
 
 ################################################################################
@@ -71,8 +60,19 @@ resource "kubectl_manifest" "karpenter_node_template" {
       # Root device
       - deviceName: /dev/xvda
         ebs:
+          volumeSize: 4Gi
+          volumeType: gp3
+          iops: 3000
+          throughput: 125
+          encrypted: true
+          deleteOnTermination: true
+      # Data device: Container resources such as images and logs
+      - deviceName: /dev/xvdb
+        ebs:
           volumeSize: 20Gi
           volumeType: gp3
+          iops: 3000
+          throughput: 125
           encrypted: true
           deleteOnTermination: true
       subnetSelector:
@@ -82,7 +82,7 @@ resource "kubectl_manifest" "karpenter_node_template" {
         Name: "*node*"
       tags:
         karpenter.sh/cluster_name: ${module.eks_blueprints.eks_cluster_id}
-        Name: thesis-btl-x86
+        Name: thesis-btl-x86-karpenter
       metadataOptions:
         httpEndpoint: enabled
         httpProtocolIPv6: disabled
@@ -108,7 +108,7 @@ resource "kubectl_manifest" "karpenter_provisioner" {
           values: ["c", "m", "r", "t"]
         - key: "karpenter.k8s.aws/instance-cpu"
           operator: In
-          values: ["4"]
+          values: ["2", "4", "8"]
         - key: "karpenter.k8s.aws/instance-hypervisor"
           operator: In
           values: ["nitro"]
@@ -123,8 +123,8 @@ resource "kubectl_manifest" "karpenter_provisioner" {
           values: ["spot"]
       limits:
         resources:
-          cpu: "16"
-          memory: 64Gi
+          cpu: "32"
+          memory: 128Gi
       labels:
         type: karpenter
       providerRef:
