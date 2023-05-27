@@ -1,6 +1,6 @@
 #Cluster provisioning.
 module "eks_blueprints" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.31.0"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.32.0"
 
   cluster_name = local.project
 
@@ -33,6 +33,14 @@ module "eks_blueprints" {
       self        = true
     }
 
+    ingress_self_prometheus_push_gw = {
+      description = "Allow prometheus push gateways within node groups"
+      protocol    = "tcp"
+      from_port   = 9091
+      to_port     = 9091
+      type        = "ingress"
+      self        = true
+    }
     ingress_self_prometheus = {
       description = "Allow grafana access prometheus within node groups"
       protocol    = "tcp"
@@ -196,6 +204,23 @@ module "eks_blueprints" {
       self        = true
     }
 
+    egress_self_prometheus = {
+      description = "Allow grafana access prometheus within node groups"
+      protocol    = "tcp"
+      from_port   = 9090
+      to_port     = 9090
+      type        = "egress"
+      self        = true
+    }
+
+    egress_self_prometheus_push_gw = {
+      description = "Allow prometheus push gateways within node groups"
+      protocol    = "tcp"
+      from_port   = 9091
+      to_port     = 9091
+      type        = "egress"
+      self        = true
+    }
   }
 
   managed_node_groups = {
@@ -223,9 +248,9 @@ module "eks_blueprints" {
       }
 
       # 4> Node Group compute configuration
-      ami_type       = "BOTTLEROCKET_x86_64"                                   # AL2_x86_64, AL2_x86_64_GPU, AL2_ARM_64, CUSTOM, BOTTLEROCKET_ARM_64, BOTTLEROCKET_x86_64
-      capacity_type  = "SPOT"                                                  # ON_DEMAND or SPOT
-      instance_types = ["m5.xlarge", "m6a.xlarge", "m5a.xlarge", "m6g.xlarge"] # List of instances to get capacity from multipe pools
+      ami_type       = "BOTTLEROCKET_x86_64"                                  # AL2_x86_64, AL2_x86_64_GPU, AL2_ARM_64, CUSTOM, BOTTLEROCKET_ARM_64, BOTTLEROCKET_x86_64
+      capacity_type  = "SPOT"                                                 # ON_DEMAND or SPOT
+      instance_types = ["m5.xlarge", "m6i.xlarge", "m5a.xlarge", "m4.xlarge"] # List of instances to get capacity from multipe pools
       block_device_mappings = [
         {
           device_name = "/dev/xvda"

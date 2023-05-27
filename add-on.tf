@@ -2,14 +2,6 @@ module "eks_blueprints_kubernetes_addons" {
   source         = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons"
   eks_cluster_id = module.eks_blueprints.eks_cluster_id
 
-  # # parameter for aws-ia/terraform-aws-eks-blueprints-addons
-  # source            = "github.com/aws-ia/terraform-aws-eks-blueprints-addons"
-  # cluster_name      = module.eks_blueprints.eks_cluster_id
-  # oidc_provider_arn = module.eks_blueprints.eks_oidc_provider_arn
-  # oidc_provider     = module.eks_blueprints.oidc_provider
-  # cluster_endpoint  = module.eks_blueprints.eks_cluster_endpoint
-  # cluster_version   = local.cluster_version
-
   enable_aws_load_balancer_controller = true
   enable_karpenter                    = true
 
@@ -28,6 +20,10 @@ module "eks_blueprints_kubernetes_addons" {
 
   enable_metrics_server                = true
   enable_amazon_eks_aws_ebs_csi_driver = true
+
+  depends_on = [
+    module.eks_blueprints.managed_node_groups
+  ]
 }
 
 
