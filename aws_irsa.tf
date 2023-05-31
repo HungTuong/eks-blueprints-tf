@@ -67,7 +67,7 @@ POLICY
 #---------------------------------------------------------------
 
 module "cluster_role" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints-addons/modules/irsa"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints/modules/irsa"
 
   kubernetes_namespace        = local.namespace
   create_kubernetes_namespace = false
