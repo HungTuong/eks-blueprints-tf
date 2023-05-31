@@ -45,6 +45,24 @@ module "vpc" {
 
   tags = local.tags
 }
+
+resource "aws_security_group" "vpce_sg" {
+  name        = "mongo-vpce-sg"
+  description = "Allow EKS node connect to MongoDB"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    description     = "Allow node connect to MongoDB"
+    from_port       = 27017
+    to_port         = 27017
+    protocol        = "tcp"
+    security_groups = [module.eks_blueprints.worker_node_security_group_id]
+  }
+
+  tags       = local.tags
+  depends_on = [module.eks_blueprints]
+}
+
 module "endpoints" {
   source = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
 
@@ -74,8 +92,15 @@ module "endpoints" {
   ]
 }
 POLICY
+    },
+    mongodb = {
+      service_name       = var.mongodb_atlas_endpoint
+      subnet_ids         = module.vpc.private_subnets
+      security_group_ids = [aws_security_group.vpce_sg.id]
+      tags               = { Name = "mongodb-vpc-endpoint" }
     }
   }
 
-  tags = local.tags
+  tags       = local.tags
+  depends_on = [aws_security_group.vpce_sg]
 }
