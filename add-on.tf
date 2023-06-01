@@ -22,6 +22,7 @@ module "eks_blueprints_kubernetes_addons" {
   enable_amazon_eks_aws_ebs_csi_driver = true
 
   depends_on = [
+    module.eks_blueprints,
     module.eks_blueprints.managed_node_groups
   ]
 }

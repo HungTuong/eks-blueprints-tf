@@ -59,8 +59,13 @@ resource "aws_security_group" "vpce_sg" {
     security_groups = [module.eks_blueprints.worker_node_security_group_id]
   }
 
-  tags       = local.tags
-  depends_on = [module.eks_blueprints]
+  tags = merge(local.tags, {
+    Name = "mongo-vpce"
+  })
+  depends_on = [
+    module.eks_blueprints,
+    module.eks_blueprints_kubernetes_addons
+  ]
 }
 
 module "endpoints" {
@@ -74,25 +79,6 @@ module "endpoints" {
       service_type    = "Gateway"
       route_table_ids = module.vpc.private_route_table_ids
       tags            = { Name = "s3-vpc-endpoint" }
-      policy          = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Principal": "*",
-      "Action": [
-        "s3:GetObject",
-        "s3:PutObject"
-      ],
-      "Resource": [
-        "${data.aws_s3_bucket.taly_video.arn}/*",
-        "${data.aws_s3_bucket.taly_video.arn}"
-      ],
-      "Effect": "Allow"
-    }
-  ]
-}
-POLICY
     },
     mongodb = {
       service_name       = var.mongodb_atlas_endpoint
