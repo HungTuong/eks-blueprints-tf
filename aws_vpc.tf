@@ -71,6 +71,7 @@ module "endpoints" {
   endpoints = {
     s3 = {
       service         = "s3"
+      service_type    = "Gateway"
       route_table_ids = module.vpc.private_route_table_ids
       tags            = { Name = "s3-vpc-endpoint" }
       policy          = <<POLICY

@@ -238,7 +238,7 @@ module "eks_blueprints" {
       # 2> Node Group scaling configuration
       # desized and min >= 2 for karpenter
       desired_size = 2
-      min_size     = 0
+      min_size     = 2
       max_size     = 2
 
       # 3> Node Group IAM policy configuration
@@ -248,9 +248,9 @@ module "eks_blueprints" {
       }
 
       # 4> Node Group compute configuration
-      ami_type       = "BOTTLEROCKET_x86_64"                                  # AL2_x86_64, AL2_x86_64_GPU, AL2_ARM_64, CUSTOM, BOTTLEROCKET_ARM_64, BOTTLEROCKET_x86_64
-      capacity_type  = "SPOT"                                                 # ON_DEMAND or SPOT
-      instance_types = ["m5.xlarge", "m6i.xlarge", "m5a.xlarge", "m4.xlarge"] # List of instances to get capacity from multipe pools
+      ami_type       = "BOTTLEROCKET_x86_64"                              # AL2_x86_64, AL2_x86_64_GPU, AL2_ARM_64, CUSTOM, BOTTLEROCKET_ARM_64, BOTTLEROCKET_x86_64
+      capacity_type  = "SPOT"                                             # ON_DEMAND or SPOT
+      instance_types = ["m5.large", "m6i.large", "m5a.large", "m4.large"] # List of instances to get capacity from multipe pools
       block_device_mappings = [
         {
           device_name = "/dev/xvda"
@@ -271,7 +271,7 @@ module "eks_blueprints" {
       subnet_ids  = module.vpc.private_subnets # Defaults to private subnet-ids used by EKS Controle plane. Define your private/public subnets list with comma separated subnet_ids  = ['subnet1','subnet2','subnet3']
 
       k8s_labels = {
-        Environment = "dev"
+        Environment = "prod"
         WorkerType  = "SPOT"
       }
       additional_tags = {
