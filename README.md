@@ -55,6 +55,6 @@ To teardown and remove the resources created in this example:
 
 ```sh
 terraform destroy -target="module.eks_blueprints_kubernetes_addons" -auto-approve
-terraform destroy -target="module.eks" -auto-approve
+terraform destroy -target="module.eks_blueprints" -auto-approve
 terraform destroy -auto-approve
 ```
