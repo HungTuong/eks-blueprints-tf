@@ -248,9 +248,9 @@ module "eks_blueprints" {
       }
 
       # 4> Node Group compute configuration
-      ami_type       = "BOTTLEROCKET_x86_64"                                  # AL2_x86_64, AL2_x86_64_GPU, AL2_ARM_64, CUSTOM, BOTTLEROCKET_ARM_64, BOTTLEROCKET_x86_64
-      capacity_type  = "SPOT"                                                 # ON_DEMAND or SPOT
-      instance_types = ["m5.xlarge", "m6i.xlarge", "m5a.xlarge", "m4.xlarge"] # List of instances to get capacity from multipe pools
+      ami_type       = "BOTTLEROCKET_x86_64"                                                              # AL2_x86_64, AL2_x86_64_GPU, AL2_ARM_64, CUSTOM, BOTTLEROCKET_ARM_64, BOTTLEROCKET_x86_64
+      capacity_type  = "SPOT"                                                                             # ON_DEMAND or SPOT
+      instance_types = ["c6a.xlarge", "c5a.xlarge", "m5.xlarge", "m6i.xlarge", "m5a.xlarge", "m4.xlarge"] # List of instances to get capacity from multipe pools
       block_device_mappings = [
         {
           device_name = "/dev/xvda"
