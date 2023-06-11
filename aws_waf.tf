@@ -31,6 +31,14 @@ resource "aws_wafv2_web_acl" "alb_web_acl" {
 
             name = "SizeRestrictions_BODY"
           }
+
+          rule_action_override {
+            action_to_use {
+              count {}
+            }
+
+            name = "CrossSiteScripting_BODY"
+          }
         }
       }
 
